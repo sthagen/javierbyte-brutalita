@@ -12,7 +12,7 @@ const GRID_MAX_X = SEGMENTS[0];
 const GRID_MAX_Y = SEGMENTS[1] + 1;
 const GRID_STEP = 0.5;
 
-const VALID_WEIGHTS = [300, 400, 700] as const;
+const VALID_WEIGHTS = [300, 400, 500, 700] as const;
 const KNOWN_CONFIG_KEYS = [
   'name',
   'weight',
@@ -107,7 +107,7 @@ function validateConfig(
 
   if (raw.weight !== undefined) {
     const weight = Number(raw.weight);
-    if (weight === 300 || weight === 400 || weight === 700) {
+    if (weight === 300 || weight === 400 || weight === 500 || weight === 700) {
       config.weight = weight;
     } else {
       warnings.push({

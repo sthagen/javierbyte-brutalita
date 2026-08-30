@@ -29,6 +29,7 @@ import type {
 const weightToStrokeWidth: Record<FontWeightType, number> = {
   300: 1.5,
   400: 2,
+  500: 2.2,
   700: 2.5,
 };
 

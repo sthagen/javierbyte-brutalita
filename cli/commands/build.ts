@@ -63,7 +63,7 @@ export const spec = {
       type: 'string',
       short: 'w',
       arg: '<list>',
-      desc: '300, 400, 700 — comma-separated, or "all"',
+      desc: '300, 400, 500, 700 — comma-separated, or "all"',
       default: "the source's weight",
     },
     mono: {

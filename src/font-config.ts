@@ -29,7 +29,7 @@ export function fontConfigReducer(state: FontConfig, action: FontConfigAction) {
     case 'change-weight': {
       const weight = Number(action.payload);
       const next = { ...state };
-      if (weight === 300 || weight === 400 || weight === 700) {
+      if (weight === 300 || weight === 400 || weight === 500 || weight === 700) {
         next.weight = weight;
       }
       return next;

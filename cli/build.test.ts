@@ -175,10 +175,10 @@ test('stampTimestamps keeps the font parseable and its checksums valid', () => {
 
 test('resolveWeights handles lists, "all" and the default', () => {
   assert.deepEqual(resolveWeights(undefined, 700), [700]);
-  assert.deepEqual(resolveWeights('all', 400), [300, 400, 700]);
+  assert.deepEqual(resolveWeights('all', 400), [300, 400, 500, 700]);
   assert.deepEqual(resolveWeights('700,300', 400), [700, 300]);
   assert.deepEqual(resolveWeights('400,400', 400), [400]);
-  assert.throws(() => resolveWeights('500', 400), /--weight must be one of/);
+  assert.throws(() => resolveWeights('250', 400), /--weight must be one of/);
 });
 
 test('renderFilename expands every token', () => {

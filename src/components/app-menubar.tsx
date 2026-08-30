@@ -177,6 +177,9 @@ export function AppMenubar({
                   <ToggleGroupItem value="400" className={segmentItem}>
                     400
                   </ToggleGroupItem>
+                  <ToggleGroupItem value="500" className={segmentItem}>
+                    500
+                  </ToggleGroupItem>
                   <ToggleGroupItem value="700" className={segmentItem}>
                     700
                   </ToggleGroupItem>

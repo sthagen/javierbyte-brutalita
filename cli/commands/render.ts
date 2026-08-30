@@ -1,5 +1,6 @@
 import { basename, extname } from 'node:path';
 
+import { SUPPORTED_WEIGHTS } from '../../src/font-maker';
 import { renderTextToSVG } from '../../src/svg-export';
 import type { FontWeightType } from '../../src/types';
 
@@ -71,7 +72,7 @@ export const spec = {
     weight: {
       type: 'string',
       short: 'w',
-      arg: '<300|400|700>',
+      arg: '<300|400|500|700>',
       desc: 'Weight to render at',
       default: "the source's weight",
     },
@@ -129,7 +130,9 @@ export function run(
   const config = applyConfigOverrides(source.config, values);
 
   const weight = values.weight
-    ? (Number(asEnum(values.weight, '--weight', ['300', '400', '700'])) as FontWeightType)
+    ? (Number(
+        asEnum(values.weight, '--weight', SUPPORTED_WEIGHTS.map(String))
+      ) as FontWeightType)
     : config.weight;
 
   const text =

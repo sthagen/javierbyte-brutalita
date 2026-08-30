@@ -20,6 +20,7 @@ const LINE_HEIGHT = 30;
 const STROKE_WIDTH_BY_WEIGHT: Record<FontWeightType, number> = {
   300: 1.5,
   400: 2,
+  500: 2.2,
   700: 2.5,
 };
 
@@ -38,6 +39,7 @@ const KERN_PX = KERNING / FONT_UNITS_PER_PX; // 3.2px gap between proportional g
 const WEIGHT_FRACTION: Record<FontWeightType, number> = {
   300: 0.15,
   400: 0.25,
+  500: 0.27,
   700: 0.3,
 };
 

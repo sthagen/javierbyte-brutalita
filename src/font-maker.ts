@@ -7,6 +7,7 @@ const CIRCLE_SEGMENTS = 16;
 const WEIGHTS = {
   '300': 0.15,
   '400': 0.25,
+  '500': 0.27,
   '700': 0.3,
 } as const;
 
@@ -15,11 +16,12 @@ const WEIGHTS = {
 export const STYLE_NAME_BY_WEIGHT: Record<FontWeightType, string> = {
   300: 'Light',
   400: 'Regular',
+  500: 'Medium',
   700: 'Bold',
 };
 
 /** The weights the stroke expansion has hand-tuned widths for. */
-export const SUPPORTED_WEIGHTS = [300, 400, 700] as const satisfies readonly FontWeightType[];
+export const SUPPORTED_WEIGHTS = [300, 400, 500, 700] as const satisfies readonly FontWeightType[];
 
 const CHAR_X = 2;
 const CHAR_Y = 4;

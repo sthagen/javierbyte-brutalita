@@ -1,3 +1,8 @@
+# Single-package repo, but pnpm 9 (what Vercel picks for this project) refuses to
+# install when a pnpm-workspace.yaml has no `packages`, so the root is listed.
+packages:
+  - "."
+
 # esbuild needs its postinstall to fetch the native binary (scripts/build-cli.ts
 # depends on it); sharp arrives via next. Without this pnpm 11 aborts the install
 # with ERR_PNPM_IGNORED_BUILDS, which breaks CI.

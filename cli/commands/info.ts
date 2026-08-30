@@ -26,7 +26,7 @@ export const spec = {
   },
   examples: [
     'brutalita info src/font.json',
-    'brutalita info public/Brutalita-400.otf --coverage',
+    'brutalita info public/font/Brutalita-Regular.otf --coverage',
   ],
 } satisfies CommandSpec;
 

@@ -20,6 +20,7 @@ const KNOWN_CONFIG_KEYS = [
   'monospace',
   'designer',
   'designerURL',
+  'version',
 ];
 
 /** Printable ASCII — the range a font is expected to cover end to end. */
@@ -99,6 +100,7 @@ function validateConfig(
   if (raw.monospace !== undefined) config.monospace = Boolean(raw.monospace);
   if (raw.designer !== undefined) config.designer = String(raw.designer);
   if (raw.designerURL !== undefined) config.designerURL = String(raw.designerURL);
+  if (raw.version !== undefined) config.version = String(raw.version);
   if (raw.height !== undefined && Number.isFinite(Number(raw.height))) {
     config.height = Number(raw.height);
   }

@@ -96,7 +96,7 @@ export const spec = {
   ],
   examples: [
     'brutalita build src/font.json -o Brutalita.otf',
-    'brutalita build src/font.json -d public -w all --filename "Brutalita-{weight}.{ext}"',
+    'brutalita build src/font.json -d public/font -w all',
     'brutalita build src/font.json -w 700 -o - > Bold.otf',
   ],
 } satisfies CommandSpec;

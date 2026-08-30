@@ -92,6 +92,9 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+      woff2-encoder:
+        specifier: ^2.0.0
+        version: 2.0.0
 
 packages:
 
@@ -1759,6 +1762,10 @@ packages:
       '@types/react':
         optional: true
 
+  woff2-encoder@2.0.0:
+    resolution: {integrity: sha512-wH1rcskczCP5+BJABM88aM3hoEX1VUW6U+Ksx/7bmXvctWGqF+O/YQdC6vWQ7lJS7ny21a0MkAqcZyOP2O8CAg==}
+    engines: {node: '>= 18.x'}
+
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
@@ -3289,3 +3296,5 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.18
+
+  woff2-encoder@2.0.0: {}

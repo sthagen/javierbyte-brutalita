@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
+import { fontDisplayName } from '../src/font-maker';
 import { validateFontSource } from '../src/font-validate';
 import source from '../src/font.json';
 import { renderTextToSVG } from '../src/svg-export';
@@ -50,7 +51,7 @@ test('monospace and proportional layouts differ', () => {
 // here proves the renderer still produces the same output.
 test('reproduces public/brutalita-cover.svg', () => {
   const text = [
-    config.name,
+    fontDisplayName(config),
     '',
     'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQ',
     'qRrSsTtUuVvWwXxYyZz0123456789!"#$',

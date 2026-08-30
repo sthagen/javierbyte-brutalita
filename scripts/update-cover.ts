@@ -7,6 +7,7 @@
 // interpolates the font's own name from its config.
 import { readFileSync, writeFileSync } from 'node:fs';
 
+import { fontDisplayName } from '../src/font-maker';
 import { renderTextToSVG } from '../src/svg-export';
 import type { FontDefinition, FontWeightType } from '../src/types';
 
@@ -19,13 +20,13 @@ const PADDING = 72;
 const TARGET_WIDTH = 800; // match the previous cover's width
 
 const { config, chars } = JSON.parse(readFileSync(FONT_JSON, 'utf8')) as {
-  config: { name: string; weight: FontWeightType; monospace: boolean };
+  config: { name: string; version?: string; weight: FontWeightType; monospace: boolean };
   chars: FontDefinition;
 };
 
-// ${FONT_NAME} is filled from the font config so the banner tracks the version.
+// The heading is filled from the font config so the banner tracks the version.
 const text = [
-  config.name,
+  fontDisplayName(config),
   '',
   'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQ',
   'qRrSsTtUuVvWwXxYyZz0123456789!"#$',

@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             an OTF file.
           </p>
           <p>
-            <a href="/Brutalita-400.otf">Download Brutalita Regular (OTF)</a>
+            <a href="/font/Brutalita-Regular.otf">Download Brutalita Regular (OTF)</a>
           </p>
         </noscript>
       </body>

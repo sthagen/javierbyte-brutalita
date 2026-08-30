@@ -321,8 +321,20 @@ function makeGlyph(char: string, path: polygon[] = [], config: FontConfig) {
 }
 
 /** Family name as written into the font: "Brutalita" / "Brutalita Mono". */
-export function fontName(config: FontConfig): string {
+export function fontName(config: Pick<FontConfig, 'name' | 'monospace'>): string {
   return `${config.name} ${config.monospace ? 'Mono' : ''}`.trim();
+}
+
+/**
+ * Family name plus version, for specimens and UI copy: "Brutalita v0.800".
+ * Sources written before `config.version` existed simply get the bare name.
+ */
+export function fontDisplayName(
+  config: Pick<FontConfig, 'name' | 'monospace' | 'version'>
+): string {
+  return [fontName(config), config.version && `v${config.version}`]
+    .filter(Boolean)
+    .join(' ');
 }
 
 /** The metrics a build will use, for `brutalita info`. */
@@ -391,6 +403,9 @@ export function buildFont(
     weightClass: config.weight as unknown as string,
     designer: config.designer?.trim() || undefined,
     designerURL: config.designerURL?.trim() || undefined,
+    version: config.version?.trim()
+      ? `Version ${config.version.trim()}`
+      : undefined,
     ...(options.createdTimestamp !== undefined
       ? { createdTimestamp: options.createdTimestamp }
       : {}),

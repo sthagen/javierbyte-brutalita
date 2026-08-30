@@ -1,11 +1,12 @@
 {
   "config": {
-    "name": "Brutalita v0.8",
+    "name": "Brutalita",
     "weight": 400,
     "height": 1.888,
     "monospace": false,
     "designer": "javierbyte",
-    "designerURL": "https://javier.xyz"
+    "designerURL": "https://javier.xyz",
+    "version": "0.800"
   },
   "chars": {
     "0": [

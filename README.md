@@ -6,7 +6,23 @@ Brutalita is an experimental font and font editor, edit in your browser and down
 
 The name means "little brutal" in spanish. Made with SVG and Opentype.JS
 
-- Download Brutalita: https://brutalita.com/Brutalita-400.otf
+## Download
+
+These links always point at the latest release.
+
+| Weight | Desktop | Web |
+| --- | --- | --- |
+| Light | [Brutalita-Light.otf](https://brutalita.com/font/Brutalita-Light.otf) | [Brutalita-Light.woff2](https://brutalita.com/font/Brutalita-Light.woff2) |
+| Regular | [Brutalita-Regular.otf](https://brutalita.com/font/Brutalita-Regular.otf) | [Brutalita-Regular.woff2](https://brutalita.com/font/Brutalita-Regular.woff2) |
+| Bold | [Brutalita-Bold.otf](https://brutalita.com/font/Brutalita-Bold.otf) | [Brutalita-Bold.woff2](https://brutalita.com/font/Brutalita-Bold.woff2) |
+
+```css
+@font-face {
+  font-family: 'Brutalita';
+  src: url('https://brutalita.com/font/Brutalita-Regular.woff2') format('woff2');
+  font-weight: 400;
+}
+```
 
 ## CLI
 
@@ -36,7 +52,7 @@ Run `brutalita help <command>` for the full option list.
 
 ```sh
 # every weight at once, into a directory
-brutalita build src/font.json -d public -w all --filename "Brutalita-{weight}.{ext}"
+brutalita build src/font.json -d public/font -w all
 
 # pipe the bytes somewhere else
 brutalita build src/font.json -w 700 -o - > Bold.otf
@@ -52,27 +68,25 @@ brutalita info my-font.json
 Diagnostics always go to stderr, so `--out -` and `--json` stay pipeable.
 Exit codes: `0` success, `1` usage or I/O error, `2` invalid font source.
 
-### Reproducible builds
-
-`opentype.js` stamps `head.created` and `head.modified` with the current time, so
-two builds of an unchanged source differ. Pass `--timestamp` to pin both and get
-byte-identical output:
-
-```sh
-brutalita build src/font.json -o Brutalita.otf --timestamp 2024-01-01
-```
-
 ## Development
 
 ```sh
 pnpm dev         # the editor at localhost:3000
 pnpm cli         # run the CLI from source
-pnpm fonts       # regenerate public/Brutalita-{300,400,700}.otf
-pnpm cover       # regenerate the banner above
+pnpm assets      # regenerate every committed artifact (fonts + banner)
+pnpm fonts       # just public/font/Brutalita-{Light,Regular,Bold}.{otf,woff2}
+pnpm cover       # just the banner above
 pnpm test        # unit tests + golden font/SVG regression tests
 pnpm typecheck
 pnpm build:cli   # bundle the CLI to dist/cli/brutalita.mjs
 ```
+
+The generated files are committed: the `.otf` files are the golden reference for the
+build tests, and GitHub serves the banner above straight from the repo. `pnpm assets`
+rebuilds them byte-for-byte, so a clean `git status` afterwards means they are current.
+
+To release a new version of the typeface, bump `config.version` in `src/font.json` and
+the `--timestamp` in `fonts:otf`, then run `pnpm assets`.
 
 The CLI bundles to a single dependency-free file, so `dist/cli/brutalita.mjs` is
 the only thing published. The font-building core (`src/font-maker.ts`,

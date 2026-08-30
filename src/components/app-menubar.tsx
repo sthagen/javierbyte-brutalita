@@ -18,6 +18,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
+import {
+  STYLE_NAME_BY_WEIGHT,
+  SUPPORTED_WEIGHTS,
+} from '@/src/font-maker';
 import type { FontConfig } from '@/src/types';
 import type { FontConfigDispatch } from '@/src/font-config';
 
@@ -280,14 +284,17 @@ export function AppMenubar({
             <MenubarLabel className="text-muted-foreground">
               Original Brutalita
             </MenubarLabel>
-            {[300, 400, 700].map((weight) => (
-              <MenubarItem key={weight} asChild>
-                <a href={`/Brutalita-${weight}.otf`} download>
-                  <Download />
-                  Brutalita {weight}
-                </a>
-              </MenubarItem>
-            ))}
+            {SUPPORTED_WEIGHTS.map((weight) => {
+              const style = STYLE_NAME_BY_WEIGHT[weight];
+              return (
+                <MenubarItem key={weight} asChild>
+                  <a href={`/font/Brutalita-${style}.otf`} download>
+                    <Download />
+                    Brutalita {style}
+                  </a>
+                </MenubarItem>
+              );
+            })}
             <MenubarSeparator />
             <p className="px-2 py-1.5 text-xs leading-relaxed text-muted-foreground">
               Looking to download your custom font? Use the{' '}

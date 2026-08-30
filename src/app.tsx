@@ -65,7 +65,9 @@ const SPLIT = Math.floor(ALL_CHARS.length / 3) + 2;
 ALL_CHARS.splice(SPLIT, 0, `\n`);
 ALL_CHARS.splice(SPLIT * 2 + 1, 0, `\n`);
 
-const DEFAULT_TEXT = `Brutalita Sans v0.8
+const FONT_VERSION = FONT_DEFINITION_SRC.config.version;
+
+const DEFAULT_TEXT = `Brutalita Sans${FONT_VERSION ? ` v${FONT_VERSION}` : ''}
 
 ${ALL_CHARS.join(``)}
 

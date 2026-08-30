@@ -13,6 +13,13 @@ export type FontConfig = {
   monospace: boolean;
   designer?: string;
   designerURL?: string;
+  /**
+   * Release number of the typeface, conventionally three decimals ("0.800").
+   * Written to OpenType name ID 5 as "Version 0.800". The family name has to
+   * stay stable across releases or documents using the font break, so the
+   * version lives here rather than in `name`. Omitted for user fonts.
+   */
+  version?: string;
 };
 
 export type FontDefinition = {

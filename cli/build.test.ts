@@ -4,10 +4,15 @@ import { test } from 'node:test';
 
 import Opentype from 'opentype.js';
 
-import { buildFont } from '../src/font-maker';
+import {
+  buildFont,
+  fontDisplayName,
+  fontFileName,
+  STYLE_NAME_BY_WEIGHT,
+  SUPPORTED_WEIGHTS,
+} from '../src/font-maker';
 import { validateFontSource } from '../src/font-validate';
 import source from '../src/font.json';
-import type { FontWeightType } from '../src/types';
 
 import { stampTimestamps } from './otf-deterministic';
 import { renderFilename, resolveWeights, slugify } from './source';
@@ -61,15 +66,60 @@ function parse(bytes: Buffer | ArrayBuffer): Opentype.Font {
 
 const { config, chars } = validateFontSource(source);
 
-// The committed public/Brutalita-*.otf files are the reference: if a refactor
-// moves an outline or an advance width, this fails.
-for (const weight of [300, 400, 700] as FontWeightType[]) {
-  test(`build reproduces public/Brutalita-${weight}.otf`, () => {
+// The committed public/font/Brutalita-*.otf files are the reference: if a
+// refactor moves an outline or an advance width, this fails.
+for (const weight of SUPPORTED_WEIGHTS) {
+  const style = STYLE_NAME_BY_WEIGHT[weight];
+  test(`build reproduces public/font/Brutalita-${style}.otf`, () => {
     const built = buildFont(chars, { ...config, weight });
-    const reference = parse(readFileSync(`public/Brutalita-${weight}.otf`));
+    const reference = parse(readFileSync(`public/font/Brutalita-${style}.otf`));
     assert.deepEqual(normalize(parse(built.toArrayBuffer())), normalize(reference));
   });
 }
+
+// Sources exported before config.version existed must keep working untouched:
+// the field is optional, so they validate without complaint and opentype.js
+// supplies its own default for name ID 5.
+test('a font source predating config.version still validates and builds', () => {
+  const legacy = {
+    config: {
+      name: 'Brutalita v0.8',
+      weight: 400,
+      height: 1.888,
+      monospace: false,
+      designer: 'javierbyte',
+      designerURL: 'https://javier.xyz',
+    },
+    chars: source.chars,
+  };
+
+  const result = validateFontSource(legacy);
+  assert.ok(result.ok);
+  // Specifically not an "unknown config key" warning, and not a missing-field error.
+  assert.deepEqual(
+    result.warnings.filter((issue) => issue.field?.startsWith('config')),
+    []
+  );
+  assert.equal(result.config.version, undefined);
+
+  const built = parse(buildFont(result.chars, result.config).toArrayBuffer());
+  const names = built.names as unknown as Record<
+    string,
+    Record<string, Record<string, string>>
+  >;
+  assert.equal(names.unicode.fontFamily.en, 'Brutalita v0.8');
+  assert.equal(names.unicode.version.en, 'Version 0.1');
+  assert.equal(built.glyphs.length, Object.keys(result.chars).length + 1);
+});
+
+// ...and a versionless config still names its files, so `brutalita build` with
+// the default --filename template does not emit "Brutalita-undefined.otf".
+test('filenames and display names survive a missing version', () => {
+  const legacy = { ...config, version: undefined };
+  assert.equal(fontFileName(legacy), 'Brutalita-Regular.otf');
+  assert.equal(fontDisplayName(legacy), 'Brutalita');
+  assert.equal(fontDisplayName(config), 'Brutalita v0.800');
+});
 
 test('the same source and timestamp produce identical bytes', () => {
   const bytes = (): Buffer =>

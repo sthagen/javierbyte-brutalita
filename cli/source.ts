@@ -1,11 +1,17 @@
 // Load + validate a font source and apply CLI config overrides. Shared by
 // build, render, info and watch so they all reject the same bad input.
-import { fontName, SUPPORTED_WEIGHTS } from '../src/font-maker';
+import { fontName } from '../src/font-maker';
 import { formatIssue, validateFontSource } from '../src/font-validate';
 import type { Issue, ValidationResult } from '../src/font-validate';
 import type { FontConfig, FontDefinition, FontWeightType } from '../src/types';
+import {
+  MAX_WEIGHT,
+  MIN_WEIGHT,
+  parseWeight,
+  SHIPPED_WEIGHTS,
+} from '../src/weights';
 
-import { asEnum, asList, UsageError } from './args';
+import { asList, UsageError } from './args';
 import { SourceError } from './context';
 import type { CommandContext } from './context';
 import { loadSource } from './io';
@@ -85,6 +91,7 @@ export type ConfigOverrides = {
   name?: string;
   designer?: string;
   'designer-url'?: string;
+  'style-name'?: string;
   mono?: boolean;
 };
 
@@ -100,23 +107,36 @@ export function applyConfigOverrides(
     next.designerURL = values['designer-url'];
   }
   if (values.mono !== undefined) next.monospace = values.mono;
+  if (values['style-name'] !== undefined) next.styleName = values['style-name'];
   return next;
 }
 
+/** Coerce one weight flag value, naming the flag if it is not a weight. */
+export function asWeight(value: string, flag: string): FontWeightType {
+  const weight = parseWeight(value);
+  if (weight === null) {
+    throw new UsageError(
+      `${flag} must be a weight between ${MIN_WEIGHT} and ${MAX_WEIGHT} (got ${JSON.stringify(
+        value
+      )})`
+    );
+  }
+  return weight;
+}
+
 /**
- * Parse `--weight`: a comma-separated list, or "all" for every supported weight.
- * Defaults to the source's own weight.
+ * Parse `--weight`: a comma-separated list of weights, or "all" for the ones
+ * Brutalita ships. Defaults to the source's own weight.
  */
 export function resolveWeights(
   value: string | undefined,
   fallback: FontWeightType
 ): FontWeightType[] {
   if (value === undefined) return [fallback];
-  if (value.trim() === 'all') return [...SUPPORTED_WEIGHTS];
+  if (value.trim() === 'all') return [...SHIPPED_WEIGHTS];
 
-  const allowed = SUPPORTED_WEIGHTS.map(String);
-  const weights = asList(value, '--weight').map(
-    (part) => Number(asEnum(part, '--weight', allowed)) as FontWeightType
+  const weights = asList(value, '--weight').map((part) =>
+    asWeight(part, '--weight')
   );
 
   // Deduplicate but keep the order the user asked for.

@@ -18,10 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
-import {
-  STYLE_NAME_BY_WEIGHT,
-  SUPPORTED_WEIGHTS,
-} from '@/src/font-maker';
+import { SHIPPED_WEIGHTS, styleName } from '@/src/weights';
 import type { FontConfig } from '@/src/types';
 import type { FontConfigDispatch } from '@/src/font-config';
 
@@ -171,18 +168,15 @@ export function AppMenubar({
                   }}
                   className={segmentTrack}
                 >
-                  <ToggleGroupItem value="300" className={segmentItem}>
-                    300
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="400" className={segmentItem}>
-                    400
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="500" className={segmentItem}>
-                    500
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="700" className={segmentItem}>
-                    700
-                  </ToggleGroupItem>
+                  {SHIPPED_WEIGHTS.map((weight) => (
+                    <ToggleGroupItem
+                      key={weight}
+                      value={String(weight)}
+                      className={segmentItem}
+                    >
+                      {weight}
+                    </ToggleGroupItem>
+                  ))}
                 </ToggleGroup>
               </Field>
 
@@ -287,8 +281,8 @@ export function AppMenubar({
             <MenubarLabel className="text-muted-foreground">
               Original Brutalita
             </MenubarLabel>
-            {SUPPORTED_WEIGHTS.map((weight) => {
-              const style = STYLE_NAME_BY_WEIGHT[weight];
+            {SHIPPED_WEIGHTS.map((weight) => {
+              const style = styleName({ weight });
               return (
                 <MenubarItem key={weight} asChild>
                   <a href={`/font/Brutalita-${style}.otf`} download>

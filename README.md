@@ -52,8 +52,12 @@ falls back to the copy of Brutalita bundled with the CLI.
 Run `brutalita help <command>` for the full option list.
 
 ```sh
-# every weight at once, into a directory
+# the four weights above, into a directory
 brutalita build src/font.json -d public/font -w all
+
+# any weight from 1 to 1000 builds, named after itself when it has no
+# standard name (Brutalita-550.otf)
+brutalita build src/font.json -w 550 --style-name SemiMedium
 
 # pipe the bytes somewhere else
 brutalita build src/font.json -w 700 -o - > Bold.otf
@@ -75,7 +79,7 @@ Exit codes: `0` success, `1` usage or I/O error, `2` invalid font source.
 pnpm dev         # the editor at localhost:3000
 pnpm cli         # run the CLI from source
 pnpm assets      # regenerate every committed artifact (fonts + banner)
-pnpm fonts       # just public/font/Brutalita-{Light,Regular,Bold}.{otf,woff2}
+pnpm fonts       # just public/font/Brutalita-*.{otf,woff2}
 pnpm cover       # just the banner above
 pnpm test        # unit tests + golden font/SVG regression tests
 pnpm typecheck
@@ -88,6 +92,10 @@ rebuilds them byte-for-byte, so a clean `git status` afterwards means they are c
 
 To release a new version of the typeface, bump `config.version` in `src/font.json` and
 the `--timestamp` in `fonts:otf`, then run `pnpm assets`.
+
+Stroke thickness is interpolated between the anchors in `src/weights.ts`, which is
+the only place a weight is described. `SHIPPED_WEIGHTS` there lists the weights the
+site publishes and the editor offers; `--weight all` expands to it.
 
 The CLI bundles to a single dependency-free file, so `dist/cli/brutalita.mjs` is
 the only thing published. The font-building core (`src/font-maker.ts`,

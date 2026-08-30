@@ -3,7 +3,8 @@ import { extname } from 'node:path';
 
 import Opentype from 'opentype.js';
 
-import { buildFont, fontMetrics, fontName, STYLE_NAME_BY_WEIGHT } from '../../src/font-maker';
+import { buildFont, fontMetrics, fontName } from '../../src/font-maker';
+import { styleName } from '../../src/weights';
 import { PRINTABLE_ASCII } from '../../src/font-validate';
 
 import { UsageError } from '../args';
@@ -146,7 +147,7 @@ function describeSource(
   const rows: [string, string][] = [
     ['source', source.label],
     ['family', fontName(config)],
-    ['style', `${STYLE_NAME_BY_WEIGHT[config.weight]} (${config.weight})`],
+    ['style', `${styleName(config)} (${config.weight})`],
     ['spacing', config.monospace ? 'monospace' : 'proportional'],
     ['designer', config.designer || '(none)'],
     ['glyphs', String(charKeys.length)],
@@ -178,7 +179,7 @@ function describeSource(
     kind: 'source',
     source: source.label,
     family: fontName(config),
-    style: STYLE_NAME_BY_WEIGHT[config.weight],
+    style: styleName(config),
     weight: config.weight,
     monospace: config.monospace,
     designer: config.designer ?? null,

@@ -68,11 +68,11 @@ test('warns about off-grid and off-step coordinates without failing', () => {
 
 test('warns about repeated points, empty layers and unknown config keys', () => {
   const result = validateFontSource({
-    config: { wobble: true, weight: 250 },
+    config: { wobble: true, weight: 'heavy' },
     chars: { A: [[[0, 0], [0, 0]], []] },
   });
   assert.match(messages(result.warnings), /unknown config key/);
-  assert.match(messages(result.warnings), /not one of 300, 400, 500, 700/);
+  assert.match(messages(result.warnings), /not a weight between 1 and 1000/);
   assert.match(messages(result.warnings), /repeats the previous point/);
   assert.match(messages(result.warnings), /empty layer/);
   // An unsupported weight falls back rather than failing the build.

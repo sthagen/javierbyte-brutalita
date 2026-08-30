@@ -1,12 +1,9 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import {
-  buildFont,
-  fontName,
-  STYLE_NAME_BY_WEIGHT,
-} from '../../src/font-maker';
+import { buildFont, fontName } from '../../src/font-maker';
 import type { FontConfig } from '../../src/types';
+import { styleName } from '../../src/weights';
 
 import { UsageError } from '../args';
 import type { CommandSpec } from '../args';
@@ -63,7 +60,7 @@ export const spec = {
       type: 'string',
       short: 'w',
       arg: '<list>',
-      desc: '300, 400, 500, 700 — comma-separated, or "all"',
+      desc: 'Any weight 1–1000 — comma-separated, or "all"',
       default: "the source's weight",
     },
     mono: {
@@ -74,6 +71,12 @@ export const spec = {
       default: "the source's setting",
     },
     name: { type: 'string', arg: '<string>', desc: 'Override the family name' },
+    'style-name': {
+      type: 'string',
+      arg: '<string>',
+      desc: 'Override the weight-derived style name',
+      default: 'Light, Regular, Bold… else the weight itself',
+    },
     designer: { type: 'string', arg: '<string>', desc: 'Override the designer' },
     'designer-url': {
       type: 'string',
@@ -111,6 +114,7 @@ export type Values = {
   weight?: string;
   mono?: boolean;
   name?: string;
+  'style-name'?: string;
   designer?: string;
   'designer-url'?: string;
   timestamp?: string;
@@ -156,7 +160,7 @@ export function run(
 
   for (const weight of weights) {
     const config: FontConfig = { ...baseConfig, weight };
-    const style = STYLE_NAME_BY_WEIGHT[weight];
+    const style = styleName(config);
 
     const font = buildFont(source.chars, config, { createdTimestamp });
     let bytes: Buffer = Buffer.from(font.toArrayBuffer());

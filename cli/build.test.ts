@@ -8,11 +8,10 @@ import {
   buildFont,
   fontDisplayName,
   fontFileName,
-  STYLE_NAME_BY_WEIGHT,
-  SUPPORTED_WEIGHTS,
 } from '../src/font-maker';
 import { validateFontSource } from '../src/font-validate';
 import source from '../src/font.json';
+import { SHIPPED_WEIGHTS, styleName } from '../src/weights';
 
 import { stampTimestamps } from './otf-deterministic';
 import { renderFilename, resolveWeights, slugify } from './source';
@@ -68,8 +67,8 @@ const { config, chars } = validateFontSource(source);
 
 // The committed public/font/Brutalita-*.otf files are the reference: if a
 // refactor moves an outline or an advance width, this fails.
-for (const weight of SUPPORTED_WEIGHTS) {
-  const style = STYLE_NAME_BY_WEIGHT[weight];
+for (const weight of SHIPPED_WEIGHTS) {
+  const style = styleName({ weight });
   test(`build reproduces public/font/Brutalita-${style}.otf`, () => {
     const built = buildFont(chars, { ...config, weight });
     const reference = parse(readFileSync(`public/font/Brutalita-${style}.otf`));
@@ -118,7 +117,7 @@ test('filenames and display names survive a missing version', () => {
   const legacy = { ...config, version: undefined };
   assert.equal(fontFileName(legacy), 'Brutalita-Regular.otf');
   assert.equal(fontDisplayName(legacy), 'Brutalita');
-  assert.equal(fontDisplayName(config), 'Brutalita v0.800');
+  assert.equal(fontDisplayName(config), 'Brutalita v0.8');
 });
 
 test('the same source and timestamp produce identical bytes', () => {
@@ -175,10 +174,17 @@ test('stampTimestamps keeps the font parseable and its checksums valid', () => {
 
 test('resolveWeights handles lists, "all" and the default', () => {
   assert.deepEqual(resolveWeights(undefined, 700), [700]);
-  assert.deepEqual(resolveWeights('all', 400), [300, 400, 500, 700]);
+  assert.deepEqual(resolveWeights('all', 400), SHIPPED_WEIGHTS);
   assert.deepEqual(resolveWeights('700,300', 400), [700, 300]);
   assert.deepEqual(resolveWeights('400,400', 400), [400]);
-  assert.throws(() => resolveWeights('250', 400), /--weight must be one of/);
+  // Any weight builds, not just the ones Brutalita ships.
+  assert.deepEqual(resolveWeights('550', 400), [550]);
+  for (const bad of ['0', '1001', 'heavy']) {
+    assert.throws(
+      () => resolveWeights(bad, 400),
+      /--weight must be a weight between 1 and 1000/
+    );
+  }
 });
 
 test('renderFilename expands every token', () => {

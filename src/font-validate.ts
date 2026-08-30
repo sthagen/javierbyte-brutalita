@@ -1,6 +1,7 @@
 import { DEFAULT_FONT_CONFIG } from './font-config';
 import { SEGMENTS } from './types';
 import type { CharLayers, FontConfig, FontDefinition } from './types';
+import { MAX_WEIGHT, MIN_WEIGHT, parseWeight } from './weights';
 
 // Validation for a font source ({ config, chars }), shared by the CLI and the
 // browser editor. Node-safe on purpose: no DOM, no alert() — callers decide how
@@ -12,7 +13,6 @@ const GRID_MAX_X = SEGMENTS[0];
 const GRID_MAX_Y = SEGMENTS[1] + 1;
 const GRID_STEP = 0.5;
 
-const VALID_WEIGHTS = [300, 400, 500, 700] as const;
 const KNOWN_CONFIG_KEYS = [
   'name',
   'weight',
@@ -20,6 +20,7 @@ const KNOWN_CONFIG_KEYS = [
   'monospace',
   'designer',
   'designerURL',
+  'styleName',
   'version',
 ];
 
@@ -100,22 +101,23 @@ function validateConfig(
   if (raw.monospace !== undefined) config.monospace = Boolean(raw.monospace);
   if (raw.designer !== undefined) config.designer = String(raw.designer);
   if (raw.designerURL !== undefined) config.designerURL = String(raw.designerURL);
+  if (raw.styleName !== undefined) config.styleName = String(raw.styleName);
   if (raw.version !== undefined) config.version = String(raw.version);
   if (raw.height !== undefined && Number.isFinite(Number(raw.height))) {
     config.height = Number(raw.height);
   }
 
   if (raw.weight !== undefined) {
-    const weight = Number(raw.weight);
-    if (weight === 300 || weight === 400 || weight === 500 || weight === 700) {
+    const weight = parseWeight(raw.weight);
+    if (weight !== null) {
       config.weight = weight;
     } else {
       warnings.push({
         severity: 'warning',
         field: 'config.weight',
-        message: `${JSON.stringify(raw.weight)} is not one of ${VALID_WEIGHTS.join(
-          ', '
-        )} — falling back to ${config.weight}`,
+        message:
+          `${JSON.stringify(raw.weight)} is not a weight between ` +
+          `${MIN_WEIGHT} and ${MAX_WEIGHT} — falling back to ${config.weight}`,
       });
     }
   }

@@ -1,15 +1,13 @@
 import { basename, extname } from 'node:path';
 
-import { SUPPORTED_WEIGHTS } from '../../src/font-maker';
 import { renderTextToSVG } from '../../src/svg-export';
-import type { FontWeightType } from '../../src/types';
 
-import { asEnum, asPositive, UsageError } from '../args';
+import { asPositive, UsageError } from '../args';
 import type { CommandSpec } from '../args';
 import { GLOBAL_OPTIONS, SourceError } from '../context';
 import type { CommandContext } from '../context';
 import { isStdout, resolveText, writeOutput, writeStdout } from '../io';
-import { applyConfigOverrides, loadValidatedSource } from '../source';
+import { applyConfigOverrides, asWeight, loadValidatedSource } from '../source';
 
 export const spec = {
   name: 'render',
@@ -72,8 +70,8 @@ export const spec = {
     weight: {
       type: 'string',
       short: 'w',
-      arg: '<300|400|500|700>',
-      desc: 'Weight to render at',
+      arg: '<number>',
+      desc: 'Weight to render at (1–1000)',
       default: "the source's weight",
     },
     mono: {
@@ -130,9 +128,7 @@ export function run(
   const config = applyConfigOverrides(source.config, values);
 
   const weight = values.weight
-    ? (Number(
-        asEnum(values.weight, '--weight', SUPPORTED_WEIGHTS.map(String))
-      ) as FontWeightType)
+    ? asWeight(values.weight, '--weight')
     : config.weight;
 
   const text =

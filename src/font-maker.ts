@@ -1,27 +1,9 @@
 import Opentype from 'opentype.js';
 import polygonClipping from 'polygon-clipping';
-import { FontConfig, FontDefinition, FontWeightType } from './types';
+import { FontConfig, FontDefinition } from './types';
+import { strokeFraction, styleName } from './weights';
 
 const CIRCLE_SEGMENTS = 16;
-
-const WEIGHTS = {
-  '300': 0.15,
-  '400': 0.25,
-  '500': 0.27,
-  '700': 0.3,
-} as const;
-
-// Human-readable OpenType subfamily name for each weight. opentype.js derives
-// fsSelection from weightClass automatically (>= 600 -> Bold, else Regular).
-export const STYLE_NAME_BY_WEIGHT: Record<FontWeightType, string> = {
-  300: 'Light',
-  400: 'Regular',
-  500: 'Medium',
-  700: 'Bold',
-};
-
-/** The weights the stroke expansion has hand-tuned widths for. */
-export const SUPPORTED_WEIGHTS = [300, 400, 500, 700] as const satisfies readonly FontWeightType[];
 
 const CHAR_X = 2;
 const CHAR_Y = 4;
@@ -35,7 +17,7 @@ const ASCENDER = Math.round((SCALE_Y * 5) / 4);
 const DESCENDER = -Math.round(SCALE_Y / 4);
 
 function configToMetrics(config: FontConfig) {
-  const weight = WEIGHTS[config.weight];
+  const weight = strokeFraction(config.weight);
   const monospaceAdvance =
     UNITS_PER_EM - SCALE_X - KERNING + (weight / CHAR_X / 2) * UNITS_PER_EM;
   return { weight, monospaceAdvance };
@@ -328,7 +310,7 @@ export function fontName(config: Pick<FontConfig, 'name' | 'monospace'>): string
 }
 
 /**
- * Family name plus version, for specimens and UI copy: "Brutalita v0.800".
+ * Family name plus version, for specimens and UI copy: "Brutalita v0.8".
  * Sources written before `config.version` existed simply get the bare name.
  */
 export function fontDisplayName(
@@ -357,7 +339,7 @@ export function fontMetrics(config: FontConfig) {
 
 // Suggested .otf file name for a config, e.g. "Brutalita Custom-Regular.otf".
 export function fontFileName(config: FontConfig): string {
-  return `${fontName(config)}-${STYLE_NAME_BY_WEIGHT[config.weight]}.otf`;
+  return `${fontName(config)}-${styleName(config)}.otf`;
 }
 
 export type BuildFontOptions = {
@@ -396,7 +378,8 @@ export function buildFont(
 
   return new Opentype.Font({
     familyName: fontName(config),
-    styleName: STYLE_NAME_BY_WEIGHT[config.weight],
+    // opentype.js derives fsSelection from weightClass (>= 600 -> Bold).
+    styleName: styleName(config),
     unitsPerEm: UNITS_PER_EM,
     ascender: ASCENDER,
     descender: DESCENDER,

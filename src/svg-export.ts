@@ -1,5 +1,6 @@
 import { SEGMENTS } from './types';
 import type { FontDefinition, FontWeightType } from './types';
+import { editorStrokeWidth, strokeFraction } from './weights';
 
 // Render brutalita text to a single, self-contained SVG of single-line strokes —
 // the same look as the editor preview (src/components/key.tsx + .key/.type in
@@ -16,14 +17,6 @@ const HEIGHT = 1 * EDITOR_FONT_SIZE;
 const ADVANCE = 14;
 const LINE_HEIGHT = 30;
 
-// Stroke width per weight — matches `weightToStrokeWidth` in src/app.tsx.
-const STROKE_WIDTH_BY_WEIGHT: Record<FontWeightType, number> = {
-  300: 1.5,
-  400: 2,
-  500: 2.2,
-  700: 2.5,
-};
-
 // Horizontal metrics from the .otf build (src/font-maker.ts), reused for the
 // proportional (non-mono) layout. In this editor space one glyph cell (SCALE_X
 // font units) spans WIDTH px, so FONT_UNITS_PER_PX converts those .otf metrics
@@ -33,15 +26,6 @@ const SCALE_X = 640;
 const KERNING = 256;
 const FONT_UNITS_PER_PX = SCALE_X / WIDTH; // 640 / 8 = 80
 const KERN_PX = KERNING / FONT_UNITS_PER_PX; // 3.2px gap between proportional glyphs
-
-// Stroke weight as a fraction of the em — mirrors WEIGHTS in src/font-maker.ts,
-// used to derive the proportional space advance.
-const WEIGHT_FRACTION: Record<FontWeightType, number> = {
-  300: 0.15,
-  400: 0.25,
-  500: 0.27,
-  700: 0.3,
-};
 
 export type SvgExportOptions = {
   padding?: number;
@@ -94,7 +78,7 @@ export function renderTextToSVG(
   const color = options.color ?? '#fff';
   const weight = options.weight ?? 400;
   const monospace = options.monospace ?? true;
-  const strokeWidth = options.strokeWidth ?? STROKE_WIDTH_BY_WEIGHT[weight];
+  const strokeWidth = options.strokeWidth ?? editorStrokeWidth(weight);
   const dotRadius = strokeWidth * 0.75;
 
   // Reserve room for the stroke half-width / dot radius so round caps never clip,
@@ -108,7 +92,7 @@ export function renderTextToSVG(
     (UNITS_PER_EM -
       SCALE_X -
       KERNING +
-      (WEIGHT_FRACTION[weight] / 4) * UNITS_PER_EM) /
+      (strokeFraction(weight) / 4) * UNITS_PER_EM) /
     FONT_UNITS_PER_PX;
   const spaceAdvance = monoAdvancePx * 0.8;
 

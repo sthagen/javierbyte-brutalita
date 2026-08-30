@@ -25,13 +25,7 @@ import type {
   FontDefinition,
   FontWeightType,
 } from './types';
-
-const weightToStrokeWidth: Record<FontWeightType, number> = {
-  300: 1.5,
-  400: 2,
-  500: 2.2,
-  700: 2.5,
-};
+import { editorStrokeWidth } from './weights';
 
 function fontSrcToTypedFont(fontSrc: { [char: string]: number[][][] }) {
   const typedFont: FontDefinition = {};
@@ -372,7 +366,7 @@ function Write({
             key={keyIdx}
             char={char}
             path={STATE.font[char]}
-            strokeWidth={weightToStrokeWidth[fontWeight]}
+            strokeWidth={editorStrokeWidth(fontWeight)}
           />
         );
       })}

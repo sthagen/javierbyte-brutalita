@@ -1,4 +1,5 @@
 import type { FontConfig } from './types';
+import { parseWeight } from './weights';
 
 // App-layer font configuration state. Kept separate from src/app.tsx so the
 // app-layer sidebar UI can share the action type without a circular import.
@@ -27,12 +28,8 @@ export function fontConfigReducer(state: FontConfig, action: FontConfigAction) {
     case 'rename':
       return { ...state, name: action.payload };
     case 'change-weight': {
-      const weight = Number(action.payload);
-      const next = { ...state };
-      if (weight === 300 || weight === 400 || weight === 500 || weight === 700) {
-        next.weight = weight;
-      }
-      return next;
+      const weight = parseWeight(action.payload);
+      return weight === null ? state : { ...state, weight };
     }
     case 'change-width':
       return {

@@ -1,0 +1,109 @@
+name: Publish
+
+# Publishes to npm when the version in package.json is one the registry does not
+# have yet. Any other push to master ends green with nothing done, so bumping the
+# version is the only thing that cuts a release.
+#
+# Auth is npm trusted publishing (OIDC) — no NPM_TOKEN. The trusted publisher is
+# registered at https://www.npmjs.com/package/brutalita/access and pinned to this
+# workflow filename, so renaming this file breaks publishing until it is updated
+# there too.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - id: version
+        run: |
+          name=$(npm pkg get name | tr -d '"')
+          version=$(npm pkg get version | tr -d '"')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is already on npm — skipping"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$name@$version is new — publishing"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: check
+    if: needs.check.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # gh release create
+      id-token: write # npm OIDC
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false # never cache in a release build
+
+      # Trusted publishing needs npm >= 11.5.1.
+      - run: npm install -g npm@latest
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build:cli
+
+      # cli/index.ts imports its version from package.json and esbuild inlines
+      # it, so this catches an unbuilt or stale dist/ before it ships.
+      - name: Smoke-test the bundle
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          test -x dist/cli/brutalita.mjs
+          built=$(node dist/cli/brutalita.mjs --version)
+          [ "$built" = "$VERSION" ] || {
+            echo "bundle reports $built, expected $VERSION"
+            exit 1
+          }
+
+      # Built explicitly above, so skip the prepublishOnly rebuild.
+      - run: npm publish --ignore-scripts
+
+      # gh release create makes the tag itself at --target.
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          short=${VERSION%.0}
+          notes=$(awk -v a="# $VERSION" -v b="# $short" '
+            $0==a || $0==b { f=1; next }
+            f && /^# / { exit }
+            f { print }
+          ' CHANGELOG.md)
+          if [ -n "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
+            printf '%s\n' "$notes" > "$RUNNER_TEMP/notes.md"
+            gh release create "v$VERSION" --title "v$VERSION" \
+              --notes-file "$RUNNER_TEMP/notes.md" --target "$GITHUB_SHA"
+          else
+            gh release create "v$VERSION" --title "v$VERSION" \
+              --generate-notes --target "$GITHUB_SHA"
+          fi

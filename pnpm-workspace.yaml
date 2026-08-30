@@ -1,0 +1,6 @@
+# esbuild needs its postinstall to fetch the native binary (scripts/build-cli.ts
+# depends on it); sharp arrives via next. Without this pnpm 11 aborts the install
+# with ERR_PNPM_IGNORED_BUILDS, which breaks CI.
+allowBuilds:
+  esbuild: true
+  sharp: true
